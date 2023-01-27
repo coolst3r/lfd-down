@@ -1,0 +1,42 @@
+import os
+import sys
+import subprocess
+import tkinter as tk
+from tkinter import filedialog
+
+def check_dependencies():
+    try:
+        subprocess.run(["which", "aria2c"], check=True)
+    except subprocess.CalledProcessError:
+        subprocess.run(["sudo", "pacman", "-S", "aria2"])
+
+def download_file(link, save_path, proxy=None, vpn=None):
+    command = ["aria2c", "-d", save_path, link]
+    if proxy:
+        command += ["--all-proxy", proxy]
+    if vpn:
+        command += ["--bt-peer-proxy", vpn]
+    subprocess.run(command)
+
+def main():
+    root = tk.Tk()
+    root.withdraw()
+    save_path = filedialog.askdirectory()
+
+    check_dependencies()
+
+    links = []
+    while True:
+        link = input("Enter a link to download (or 'start' to begin downloads): ")
+        if link == "start":
+            break
+        links.append(link)
+
+    proxy = input("Enter a proxy (or leave blank if not using one): ")
+    vpn = input("Enter a VPN (or leave blank if not using one): ")
+
+    for link in links:
+        download_file(link, save_path, proxy, vpn)
+
+if __name__ == "__main__":
+    main()
